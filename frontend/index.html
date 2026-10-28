@@ -1,34 +1,75 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LexiPy — Laboratório de análise léxica</title>
-  <style>
-    :root{color-scheme:dark;--bg:#0b1020;--panel:#121a2d;--line:#293650;--text:#edf2ff;--muted:#a8b4cc;--accent:#7c9cff;--green:#67e8b0}
-    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#182647 0,#0b1020 55%);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text)}
-    .wrap{max-width:1120px;margin:auto;padding:36px 22px 60px}.top{display:flex;align-items:center;gap:14px;margin-bottom:30px}.logo{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#7898ff,#8b5cf6);font-weight:900;font-size:22px}.eyebrow{color:var(--green);font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:800}.top h1{margin:0;font-size:25px}.top p{margin:2px 0 0;color:var(--muted);font-size:14px}.hero{margin:24px 0 26px}.hero h2{font-size:clamp(28px,4vw,42px);line-height:1.1;margin:0 0 12px;max-width:760px}.hero p{max-width:760px;color:var(--muted);margin:0}.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.8fr);gap:18px}.panel{background:rgba(18,26,45,.92);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 18px 45px #0002}.panel h3{margin:0 0 14px;font-size:17px}.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}label,.muted{color:var(--muted);font-size:13px}select,textarea{width:100%;border:1px solid #34425e;background:#0b1222;color:var(--text);border-radius:10px;padding:12px;font:inherit}select{margin-bottom:14px}textarea{min-height:290px;resize:vertical;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:4}button{border:0;border-radius:10px;padding:11px 16px;font-weight:750;cursor:pointer;transition:transform .12s,opacity .12s}button:hover{transform:translateY(-1px)}button:disabled{opacity:.55;cursor:wait}.primary{background:var(--accent);color:#091126}.secondary{background:#222e48;color:var(--text);border:1px solid #3a4b6b}.actions{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}.status{font-size:13px;color:var(--muted)}.result{min-height:140px;border:1px dashed #34425e;border-radius:12px;padding:14px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}.result.success{border-color:#267c61;color:#c5ffe7;background:#0d2a27}.result.error{border-color:#9c4545;color:#ffd1d1;background:#301b24}.pill{display:inline-block;background:#1b2942;color:#b9caff;border:1px solid #34496e;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:750}.feature{padding:12px 0;border-bottom:1px solid #27334b}.feature:last-child{border:0}.feature strong{display:block;font-size:14px}.feature span{color:var(--muted);font-size:13px}.foot{margin-top:18px;color:#8290ab;font-size:12px}.api{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:12px;color:var(--muted)}.dot{width:8px;height:8px;border-radius:50%;background:#64748b}.dot.ok{background:var(--green);box-shadow:0 0 10px #67e8b055}.dot.bad{background:#fb7185}@media(max-width:760px){.layout{grid-template-columns:1fr}.wrap{padding:22px 14px}.hero h2{font-size:30px}textarea{min-height:230px}}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LexiPy — Análise Léxica</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#121a2d;--line:#293650;--text:#edf2ff;--muted:#a8b4cc;--accent:#8aa4ff;--green:#67e8b0;--red:#ff9baf}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#182647 0,#0b1020 55%);font:16px/1.5 system-ui,sans-serif;color:var(--text)}
+.wrap{max-width:1240px;margin:auto;padding:30px 18px 50px}.top{display:flex;align-items:center;gap:14px;margin-bottom:26px}.logo{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#7898ff,#8b5cf6);font-weight:900;font-size:21px}.top h1{margin:0;font-size:25px}.top p,.muted,label{color:var(--muted);font-size:13px}.top p{margin:2px 0}.hero{margin:18px 0 24px}.eyebrow{color:var(--green);font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:800}.hero h2{font-size:clamp(28px,4vw,40px);line-height:1.12;margin:8px 0;max-width:800px}.hero p{max-width:800px;color:var(--muted);margin:0}.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px}.panel{background:rgba(18,26,45,.94);border:1px solid var(--line);border-radius:17px;padding:18px;min-width:0}.panel h3{margin:0 0 14px;font-size:17px}.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:9px}select,textarea{width:100%;border:1px solid #34425e;background:#0b1222;color:var(--text);border-radius:10px;padding:12px;font:inherit}select{margin-bottom:14px}textarea{min-height:285px;resize:vertical;font:14px/1.6 ui-monospace,Consolas,monospace;tab-size:4}button{border:0;border-radius:10px;padding:11px 15px;font-weight:750;cursor:pointer}.primary{background:var(--accent);color:#091126}.secondary{background:#222e48;color:var(--text);border:1px solid #3a4b6b}.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:13px}.status{font-size:12px;color:var(--muted)}button:disabled{opacity:.55;cursor:wait}.pill{display:inline-block;background:#1b2942;color:#b9caff;border:1px solid #34496e;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:750}.intro{color:var(--muted);font-size:13px;margin:-4px 0 12px}.table-wrap{overflow:auto;max-height:290px;border:1px solid #293650;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:12px;text-align:left}th,td{padding:8px 9px;border-bottom:1px solid #293650;white-space:nowrap}th{position:sticky;top:0;background:#1b2942;color:#dce5ff}td code{font-family:ui-monospace,Consolas,monospace;color:#c7d2fe}.empty{color:var(--muted);padding:18px;border:1px dashed #34425e;border-radius:10px;font-size:13px}.error{border:1px solid #7e394b;background:#301b24;color:#ffd5dc;border-radius:10px;padding:12px;margin:8px 0;font-size:13px}.error code{color:#ffb9c6}.summary{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.stat{background:#0b1222;border:1px solid #293650;border-radius:9px;padding:7px 10px;font-size:12px;color:var(--muted)}.stat b{color:var(--text)}.definition{font-size:12px;color:var(--muted);margin:14px 0 0}.feature{padding:10px 0;border-bottom:1px solid #27334b;font-size:13px;color:var(--muted)}.feature strong{color:var(--text)}.foot{margin-top:18px;color:#8290ab;font-size:12px}@media(max-width:850px){.layout{grid-template-columns:1fr}.wrap{padding:20px 12px}textarea{min-height:220px}}
+</style>
 </head>
 <body><main class="wrap">
-  <header class="top"><div class="logo">Lx</div><div><h1>LexiPy</h1><p>Laboratório educacional de compiladores · Linguagem: Python</p></div></header>
-  <section class="hero"><div class="eyebrow">Aprenda experimentando</div><h2>Explore o código antes de analisar os tokens.</h2><p>Escreva ou escolha um pequeno programa Python e envie-o ao servidor. Nesta etapa, o LexiPy valida e recebe o código; a classificação léxica será adicionada em uma próxima fase.</p></section>
-  <div class="layout"><section class="panel"><div class="row"><h3>01 / Código-fonte</h3><span class="pill">PYTHON</span></div>
-    <label for="examples">Carregar um exemplo</label><select id="examples"><option value="">Escolha um exemplo…</option><option value="hello">Exemplo 1 — Saída de texto</option><option value="variable">Exemplo 2 — Variáveis e números</option><option value="condition">Exemplo 3 — Condicional</option></select>
-    <div class="row"><label for="source">Edite o programa abaixo</label><span id="counter" class="muted">0 caracteres</span></div>
-    <textarea id="source" spellcheck="false" aria-label="Código-fonte Python" placeholder="Digite seu código Python aqui…">print("Olá, mundo!")</textarea>
-    <div class="actions"><button id="analyze" class="primary">▶ Solicitar análise</button><button id="clear" class="secondary">Limpar código</button><span id="status" class="status" role="status" aria-live="polite">Pronto para receber código.</span></div>
-  </section>
-  <aside class="panel"><h3>02 / Resultado do servidor</h3><div id="result" class="result" role="status" aria-live="polite">A resposta da API aparecerá aqui quando você solicitar a análise.</div>
-    <div class="api"><span id="apiDot" class="dot"></span><span id="apiStatus">Verificando conexão com o backend…</span></div>
-    <div style="margin-top:24px"><h3>O que você pode testar</h3><div class="feature"><strong>✦ Entrada editável</strong><span>Digite, cole ou altere qualquer trecho do programa.</span></div><div class="feature"><strong>✦ Exemplos prontos</strong><span>Carregue exemplos e modifique-os antes do envio.</span></div><div class="feature"><strong>✦ Validação de entrada</strong><span>Código vazio ou apenas espaços é recusado com orientação.</span></div><div class="feature"><strong>✦ Próximas etapas</strong><span>A resposta atual confirma o recebimento; ainda não identifica tokens.</span></div></div>
-  </aside></div><footer class="foot">LexiPy · Projeto educacional · A API recebe o código como texto e não executa o programa enviado.</footer>
-</main><script>
-const examples={hello:'print("Olá, mundo!")',variable:'nome = "Felipe"\nidade = 20\nprint(nome, idade)',condition:'numero = 10\nif numero > 0:\n    print("Positivo")\nelse:\n    print("Zero ou negativo")'};
-const source=document.querySelector('#source'), select=document.querySelector('#examples'), counter=document.querySelector('#counter'), result=document.querySelector('#result'), status=document.querySelector('#status'), analyze=document.querySelector('#analyze');
-function count(){counter.textContent=`${source.value.length} caracteres · ${source.value.split('\n').length} linha(s)`} source.addEventListener('input',count);count();
-select.addEventListener('change',()=>{if(select.value){source.value=examples[select.value];count();status.textContent='Exemplo carregado; você pode editá-lo.';result.className='result';result.textContent='Exemplo carregado. Clique em “Solicitar análise” para enviá-lo ao servidor.'}});
-document.querySelector('#clear').addEventListener('click',()=>{source.value='';select.value='';count();source.focus();status.textContent='Campo de código limpo.';result.className='result';result.textContent='Insira um código antes de solicitar a análise.'});
-async function checkApi(){const dot=document.querySelector('#apiDot'), label=document.querySelector('#apiStatus');try{const r=await fetch('/api/health');if(!r.ok)throw Error('API indisponível');const d=await r.json();if(d.status!=='healthy')throw Error('Estado inesperado');dot.className='dot ok';label.textContent='Backend conectado';}catch(e){dot.className='dot bad';label.textContent='Backend indisponível; verifique o servidor.'}}
+<header class="top"><div class="logo">Lx</div><div><h1>LexiPy</h1><p>Laboratório educacional de compiladores · Análise léxica de Python</p></div></header>
+<section class="hero"><div class="eyebrow">Etapa 3 · Scanner</div><h2>Veja como o código se transforma em tokens.</h2><p>Escreva ou selecione um exemplo. O scanner identifica lexemas, categorias e posições sem executar o programa. Erros léxicos são apresentados com linha e coluna.</p></section>
+<div class="layout">
+<section class="panel"><div class="row"><h3>01 / Código-fonte</h3><span class="pill">PYTHON — SUBCONJUNTO</span></div>
+<label for="examples">Carregar exemplo</label><select id="examples"><option value="">Escolha um exemplo…</option><option value="hello">Saída de texto</option><option value="variable">Variáveis e números</option><option value="condition">Condicional</option><option value="error">Exemplo com erro léxico</option></select>
+<div class="row"><label for="source">Edite o código</label><span id="counter" class="muted">0 caracteres</span></div>
+<textarea id="source" spellcheck="false" aria-label="Código-fonte Python">nome = "Ana"
+idade = 20
+if idade >= 18:
+    print(nome, "maior de idade")</textarea>
+<div class="actions"><button id="analyze" class="primary">▶ Analisar tokens</button><button id="clear" class="secondary">Limpar</button><span id="status" class="status" role="status" aria-live="polite">Pronto para analisar.</span></div>
+<p class="definition"><b>Token</b>: unidade categorizada reconhecida pelo scanner. <b>Lexema</b>: trecho literal do código que corresponde ao token.</p>
+</section>
+<section class="panel"><div class="row"><h3>02 / Resultado da análise</h3><span id="resultBadge" class="pill">AGUARDANDO</span></div>
+<div class="summary" id="summary"><span class="stat">Os contadores aparecerão aqui.</span></div>
+<h3>Tokens identificados</h3><div id="tokens" class="empty">Solicite uma análise para ver os tokens.</div>
+<h3 style="margin-top:18px">Erros léxicos</h3><div id="errors" class="empty">Nenhum resultado ainda.</div>
+<div class="feature"><strong>Como ler o resultado:</strong> cada linha mostra o tipo do token, o lexema e a posição inicial (linha e coluna).</div>
+</section></div>
+<footer class="foot">LexiPy · Projeto educacional · O código enviado é tratado como texto e nunca é executado. A análise sintática será desenvolvida na Etapa 4.</footer>
+</main>
+<script>
+const examples={
+ hello:'print("Olá, mundo!")',
+ variable:'nome = "Felipe"\nidade = 20\nnota = 8.5\nprint(nome, idade, nota)',
+ condition:'numero = 10\nif numero >= 0:\n    print("Não negativo")\nelse:\n    print("Negativo")',
+ error:'valor = 10\nresultado = valor @ 2\nprint(resultado)'
+};
+const $=s=>document.querySelector(s);
+const source=$('#source'), select=$('#examples'), counter=$('#counter'), status=$('#status');
+function count(){counter.textContent=`${source.value.length} caracteres · ${source.value.split('\n').length} linha(s)`}
+source.addEventListener('input',count);count();
+select.addEventListener('change',()=>{if(select.value){source.value=examples[select.value];count();status.textContent='Exemplo carregado; você pode editá-lo.'}});
+$('#clear').addEventListener('click',()=>{source.value='';select.value='';count();source.focus();status.textContent='Campo limpo.';$('#tokens').className='empty';$('#tokens').textContent='Solicite uma análise para ver os tokens.';$('#errors').className='empty';$('#errors').textContent='Nenhum resultado ainda.';$('#summary').textContent='';$('#resultBadge').textContent='AGUARDANDO'});
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderTokens(tokens){
+ if(!tokens.length){$('#tokens').className='empty';$('#tokens').textContent='Nenhum token foi identificado.';return}
+ const counts={};tokens.forEach(t=>counts[t.tipo]=(counts[t.tipo]||0)+1);
+ $('#summary').innerHTML=`<span class="stat"><b>${tokens.length}</b> tokens</span>`+Object.entries(counts).map(([k,v])=>`<span class="stat">${esc(k)}: <b>${v}</b></span>`).join('');
+ $('#tokens').className='table-wrap';
+ $('#tokens').innerHTML='<table><thead><tr><th>Tipo</th><th>Lexema</th><th>Linha</th><th>Coluna</th></tr></thead><tbody>'+tokens.map(t=>`<tr><td>${esc(t.tipo)}</td><td><code>${esc(t.lexema)}</code></td><td>${t.linha}</td><td>${t.coluna}</td></tr>`).join('')+'</tbody></table>';
+}
+function renderErrors(errors){
+ if(!errors.length){$('#errors').className='empty';$('#errors').textContent='Nenhum erro léxico encontrado.';return}
+ $('#errors').className='';$('#errors').innerHTML=errors.map(e=>`<div class="error"><b>Linha ${e.linha}, coluna ${e.coluna}:</b> ${esc(e.mensagem)}<br>Trecho: <code>${esc(e.lexema)}</code></div>`).join('');
+}
+async function checkApi(){try{const r=await fetch('/api/health');if(!r.ok)throw Error();status.textContent='Backend conectado.'}catch{status.textContent='Backend indisponível; verifique o Docker Compose.'}}
 checkApi();
-analyze.addEventListener('click',async()=>{const codigo=source.value;if(!codigo.trim()){result.className='result error';result.textContent='Informe um código-fonte antes de solicitar a análise.';status.textContent='Entrada vazia.';return}analyze.disabled=true;status.textContent='Enviando código…';result.className='result';result.textContent='Aguardando resposta do servidor…';try{const response=await fetch('/api/analisar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigo})});const data=await response.json();if(!response.ok)throw Error(data.detail||'Não foi possível processar a requisição.');result.className='result success';result.textContent=`${data.mensagem}\n\nCaracteres recebidos: ${data.caracteres}\nLinhas: ${data.linhas}\nStatus: ${data.status}`;status.textContent='Código enviado com sucesso.'}catch(e){result.className='result error';result.textContent=e instanceof TypeError?'Não foi possível comunicar com o servidor. Verifique a conexão e tente novamente.':e.message;status.textContent='Falha ao solicitar análise.';checkApi()}finally{analyze.disabled=false}});
+$('#analyze').addEventListener('click',async()=>{
+ const codigo=source.value;
+ if(!codigo.trim()){status.textContent='Entrada vazia.';$('#resultBadge').textContent='SEM CÓDIGO';$('#errors').className='error';$('#errors').textContent='Informe um código-fonte antes de analisar.';return}
+ const btn=$('#analyze');btn.disabled=true;status.textContent='Analisando…';
+ try{
+  const r=await fetch('/api/analisar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigo})});
+  const data=await r.json();if(!r.ok)throw Error(data.detail||'Não foi possível analisar o código.');
+  renderTokens(data.tokens||[]);renderErrors(data.erros||[]);
+  $('#resultBadge').textContent=data.sucesso?'ANÁLISE OK':'COM ERROS';
+  $('#resultBadge').style.color=data.sucesso?'#67e8b0':'#ff9baf';
+  status.textContent=data.sucesso?'Análise concluída sem erros.':'Análise concluída; revise os erros abaixo.';
+ }catch(e){status.textContent=e.message;$('#errors').className='error';$('#errors').textContent=e.message}
+ finally{btn.disabled=false}
+});
 </script></body></html>
