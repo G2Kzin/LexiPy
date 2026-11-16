@@ -11,7 +11,7 @@
 </head>
 <body><main class="wrap">
 <header class="top"><div class="logo">Lx</div><div><h1>LexiPy</h1><p>Laboratório educacional de compiladores · Análise léxica de Python</p></div></header>
-<section class="hero"><div class="eyebrow">Etapa 3 · Scanner</div><h2>Veja como o código se transforma em tokens.</h2><p>Escreva ou selecione um exemplo. O scanner identifica lexemas, categorias e posições sem executar o programa. Erros léxicos são apresentados com linha e coluna.</p></section>
+<section class="hero"><div class="eyebrow">Etapa 4 · Análise léxica e sintática</div><h2>Veja como o código se transforma em tokens e em uma árvore sintática.</h2><p>Escreva ou selecione um exemplo. O scanner identifica lexemas, categorias e posições sem executar o programa. Erros léxicos são apresentados com linha e coluna.</p></section>
 <div class="layout">
 <section class="panel"><div class="row"><h3>01 / Código-fonte</h3><span class="pill">PYTHON — SUBCONJUNTO</span></div>
 <label for="examples">Carregar exemplo</label><select id="examples"><option value="">Escolha um exemplo…</option><option value="hello">Saída de texto</option><option value="variable">Variáveis e números</option><option value="condition">Condicional</option><option value="error">Exemplo com erro léxico</option></select>
@@ -26,10 +26,10 @@ if idade >= 18:
 <section class="panel"><div class="row"><h3>02 / Resultado da análise</h3><span id="resultBadge" class="pill">AGUARDANDO</span></div>
 <div class="summary" id="summary"><span class="stat">Os contadores aparecerão aqui.</span></div>
 <h3>Tokens identificados</h3><div id="tokens" class="empty">Solicite uma análise para ver os tokens.</div>
-<h3 style="margin-top:18px">Erros léxicos</h3><div id="errors" class="empty">Nenhum resultado ainda.</div>
+<h3 style="margin-top:18px">Erros léxicos</h3><div id="errors" class="empty">Nenhum resultado ainda.</div><h3 style="margin-top:18px">Análise sintática</h3><div id="syntax" class="empty">A AST e os erros sintáticos aparecerão aqui.</div><h3 style="margin-top:18px">Árvore sintática abstrata (AST)</h3><pre id="ast" class="empty" style="white-space:pre-wrap;overflow:auto;max-height:340px">Nenhuma AST disponível.</pre>
 <div class="feature"><strong>Como ler o resultado:</strong> cada linha mostra o tipo do token, o lexema e a posição inicial (linha e coluna).</div>
 </section></div>
-<footer class="foot">LexiPy · Projeto educacional · O código enviado é tratado como texto e nunca é executado. A análise sintática será desenvolvida na Etapa 4.</footer>
+<footer class="foot">LexiPy · Projeto educacional · O código enviado é tratado como texto e nunca é executado. A análise sintática constrói uma AST para o subconjunto documentado.</footer>
 </main>
 <script>
 const examples={
@@ -43,7 +43,7 @@ const source=$('#source'), select=$('#examples'), counter=$('#counter'), status=
 function count(){counter.textContent=`${source.value.length} caracteres · ${source.value.split('\n').length} linha(s)`}
 source.addEventListener('input',count);count();
 select.addEventListener('change',()=>{if(select.value){source.value=examples[select.value];count();status.textContent='Exemplo carregado; você pode editá-lo.'}});
-$('#clear').addEventListener('click',()=>{source.value='';select.value='';count();source.focus();status.textContent='Campo limpo.';$('#tokens').className='empty';$('#tokens').textContent='Solicite uma análise para ver os tokens.';$('#errors').className='empty';$('#errors').textContent='Nenhum resultado ainda.';$('#summary').textContent='';$('#resultBadge').textContent='AGUARDANDO'});
+$('#clear').addEventListener('click',()=>{source.value='';select.value='';count();source.focus();status.textContent='Campo limpo.';$('#tokens').className='empty';$('#tokens').textContent='Solicite uma análise para ver os tokens.';$('#errors').className='empty';$('#errors').textContent='Nenhum resultado ainda.';$('#summary').textContent='';$('#syntax').className='empty';$('#syntax').textContent='A AST e os erros sintáticos aparecerão aqui.';$('#ast').textContent='Nenhuma AST disponível.';$('#resultBadge').textContent='AGUARDANDO'});
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function renderTokens(tokens){
  if(!tokens.length){$('#tokens').className='empty';$('#tokens').textContent='Nenhum token foi identificado.';return}
@@ -51,6 +51,12 @@ function renderTokens(tokens){
  $('#summary').innerHTML=`<span class="stat"><b>${tokens.length}</b> tokens</span>`+Object.entries(counts).map(([k,v])=>`<span class="stat">${esc(k)}: <b>${v}</b></span>`).join('');
  $('#tokens').className='table-wrap';
  $('#tokens').innerHTML='<table><thead><tr><th>Tipo</th><th>Lexema</th><th>Linha</th><th>Coluna</th></tr></thead><tbody>'+tokens.map(t=>`<tr><td>${esc(t.tipo)}</td><td><code>${esc(t.lexema)}</code></td><td>${t.linha}</td><td>${t.coluna}</td></tr>`).join('')+'</tbody></table>';
+}
+function renderSyntax(data){
+ const box=$('#syntax');
+ if(data.sintaxe_sucesso===true){box.className='empty';box.textContent='Sintaxe válida para o subconjunto implementado.';$('#ast').textContent=JSON.stringify(data.ast,null,2)}
+ else if(data.sintaxe_sucesso===false){box.className='';box.innerHTML=(data.erros_sintaticos||[]).map(e=>`<div class="error"><b>Linha ${e.linha}, coluna ${e.coluna}:</b> ${esc(e.mensagem)}</div>`).join('');$('#ast').textContent='AST não gerada porque há erros sintáticos.'}
+ else {box.className='empty';box.textContent='A análise sintática não foi executada devido a erro léxico.';$('#ast').textContent='AST indisponível.'}
 }
 function renderErrors(errors){
  if(!errors.length){$('#errors').className='empty';$('#errors').textContent='Nenhum erro léxico encontrado.';return}
@@ -65,7 +71,7 @@ $('#analyze').addEventListener('click',async()=>{
  try{
   const r=await fetch('/api/analisar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigo})});
   const data=await r.json();if(!r.ok)throw Error(data.detail||'Não foi possível analisar o código.');
-  renderTokens(data.tokens||[]);renderErrors(data.erros||[]);
+  renderTokens(data.tokens||[]);renderErrors(data.erros||[]);renderSyntax(data);
   $('#resultBadge').textContent=data.sucesso?'ANÁLISE OK':'COM ERROS';
   $('#resultBadge').style.color=data.sucesso?'#67e8b0':'#ff9baf';
   status.textContent=data.sucesso?'Análise concluída sem erros.':'Análise concluída; revise os erros abaixo.';

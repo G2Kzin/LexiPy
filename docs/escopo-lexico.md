@@ -2,7 +2,7 @@
 
 ## Objetivo e limites
 
-O LexiPy reconhece tokens de um subconjunto didático de Python. O scanner não executa o programa e não valida a gramática, a indentação como estrutura sintática, tipos ou significado. A análise sintática fica para a Etapa 4.
+O LexiPy reconhece tokens de um subconjunto didático de Python. O scanner não executa o programa nem valida tipos ou significado. A análise sintática da Etapa 4 é uma fase separada, chamada somente quando não há erros léxicos.
 
 ## Categorias suportadas
 
@@ -60,7 +60,7 @@ O LexiPy reconhece tokens de um subconjunto didático de Python. O scanner não 
 }
 ```
 
-A lista acima é ilustrativa; os campos `caracteres` e `linhas` dependem exatamente do texto enviado.
+A lista acima é ilustrativa; os campos `caracteres` e `linhas` dependem exatamente do texto enviado. Na Etapa 4, a resposta também inclui `sintaxe_sucesso`, `ast` e `erros_sintaticos`.
 
 ### Resposta com erro léxico
 
@@ -88,4 +88,4 @@ docker compose exec backend pytest -v
 
 ## Limitações conhecidas
 
-O scanner é intencionalmente didático, não é uma implementação completa da especificação léxica do Python. Não executa código, não produz tokens de indentação/newline e não faz parsing. A interface mostra a tabela de tokens e erros, mas ainda não faz realce por cor do código-fonte nem animação passo a passo.
+O scanner é intencionalmente didático, não é uma implementação completa da especificação léxica do Python. Não executa código nem produz tokens de indentação/newline para o parser; a fase sintática usa o tokenizer padrão do Python internamente para obter esses limites. A gramática implementada é parcial; consulte `gramatica-sintatica.md`. A interface mostra a tabela de tokens e erros, mas ainda não faz realce por cor do código-fonte nem animação passo a passo.
