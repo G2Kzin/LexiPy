@@ -57,3 +57,10 @@ flowchart TD
 O parser cobre apenas o subconjunto documentado em `gramatica-sintatica.md`; não é uma implementação completa de Python. O tokenizer padrão é utilizado internamente para preservar NEWLINE/INDENT/DEDENT, pois o scanner educacional da Etapa 3 não emite esses tokens. Não há execução de código, análise semântica, verificação de tipos ou recuperação de múltiplos erros sintáticos.
 
 Os resultados quantitativos dos testes e da execução Docker devem ser preenchidos somente após a execução no ambiente de validação. A presença dos testes no repositório, por si só, não demonstra aprovação.
+
+## Referências de apoio
+
+- ALMEIDA-MARTÍNEZ, Francisco J.; URQUIZA-FUENTES, Jaime; VELÁZQUEZ-ITURBIDE, J. Ángel. Visualization of Syntax Trees for Language Processing Courses. *Journal of Universal Computer Science*, v. 15, n. 7, p. 1546–1561, 2009. DOI: https://doi.org/10.3217/jucs-015-07-1546. Apoia a utilização de visualizações de árvores sintáticas no ensino de processamento de linguagens.
+- SSANYU, Jackline; BAINOMUGISHA, Engineer; KANAGWA, Benjamin. Teaching language processing with the PAMOJA framework. *Science of Computer Programming*, v. 229, art. 102959, 2023. DOI: https://doi.org/10.1016/j.scico.2023.102959. Apresenta um framework de apoio ao ensino de processamento de linguagens.
+
+As referências fundamentam a escolha de apresentar a estrutura sintática e o fluxo de processamento de forma explícita. Elas não são evidência de eficácia educacional do LexiPy; essa eficácia exigiria avaliação com participantes e método apropriado.
