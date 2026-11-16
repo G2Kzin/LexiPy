@@ -1,4 +1,4 @@
-"""Parser recursivo descendente do subconjunto sintatico do LexiPy."""
+"""Parser recursivo descendente para o subconjunto didático do LexiPy."""
 import io
 import tokenize
 
@@ -15,45 +15,53 @@ class Parser:
            ">": (3, "MAIOR"), ">=": (3, "MAIOR_IGUAL"), "in": (3, "EM"),
            "is": (3, "IDENTIDADE"), "+": (4, "SOMA"), "-": (4, "SUBTRACAO"),
            "*": (5, "MULTIPLICACAO"), "/": (5, "DIVISAO"),
-           "//": (5, "DIVISAO_INTEIRA"), "%": (5, "RESTO"), "**": (6, "POTENCIA")}
+           "//": (5, "DIVISAO_INTEIRA"), "%": (5, "RESTO"), "**": (7, "POTENCIA")}
 
     def __init__(self, codigo):
         self.ts = []
         try:
-            for t in tokenize.generate_tokens(io.StringIO(codigo).readline):
-                if t.type not in (tokenize.ENCODING, tokenize.NL, tokenize.COMMENT):
-                    self.ts.append(t)
-        except (tokenize.TokenError, IndentationError) as e:
-            pos = e.args[1] if len(e.args) > 1 and isinstance(e.args[1], tuple) else (1, 0)
-            raise ErroSintatico(str(e.args[0]), pos[0], pos[1] + 1) from e
+            for tok in tokenize.generate_tokens(io.StringIO(codigo).readline):
+                if tok.type not in (tokenize.ENCODING, tokenize.NL, tokenize.COMMENT):
+                    self.ts.append(tok)
+        except (tokenize.TokenError, IndentationError) as exc:
+            pos = exc.args[1] if len(exc.args) > 1 and isinstance(exc.args[1], tuple) else (1, 0)
+            raise ErroSintatico(str(exc.args[0]), pos[0], pos[1] + 1) from exc
+        if not self.ts or self.ts[-1].type != tokenize.ENDMARKER:
+            raise ErroSintatico("Fim inesperado da entrada.", 1, 1)
         self.i = 0
 
+    @staticmethod
+    def node(tipo, tok, **attrs):
+        return {"tipo": tipo, "linha": tok.start[0], "coluna": tok.start[1] + 1, **attrs}
+
     def t(self):
-        return self.ts[min(self.i, len(self.ts)-1)]
+        return self.ts[min(self.i, len(self.ts) - 1)]
 
     def v(self):
         return self.t().string
 
     def pop(self):
-        t = self.t()
-        if t.type != tokenize.ENDMARKER:
+        tok = self.t()
+        if tok.type != tokenize.ENDMARKER:
             self.i += 1
-        return t
+        return tok
 
-    def accept(self, s):
-        return self.pop() if self.v() == s else None
+    def accept(self, value):
+        return self.pop() if self.v() == value else None
 
-    def need(self, s, msg=None):
-        t = self.accept(s)
-        if t is None:
-            a = self.t()
-            raise ErroSintatico(msg or f"Esperado {s!r}; encontrado {a.string or 'fim do código'!r}.", a.start[0], a.start[1]+1)
-        return t
+    def need(self, value, message=None):
+        tok = self.accept(value)
+        if tok is None:
+            cur = self.t()
+            raise ErroSintatico(message or f"Esperado {value!r}; encontrado {cur.string or 'fim do código'!r}.",
+                                cur.start[0], cur.start[1] + 1)
+        return tok
 
-    def need_type(self, typ, desc):
-        t = self.t()
-        if t.type != typ:
-            raise ErroSintatico(f"Esperado {desc}; encontrado {t.string or 'fim do código'!r}.", t.start[0], t.start[1]+1)
+    def need_type(self, typ, description):
+        tok = self.t()
+        if tok.type != typ:
+            raise ErroSintatico(f"Esperado {description}; encontrado {tok.string or 'fim do código'!r}.",
+                                tok.start[0], tok.start[1] + 1)
         return self.pop()
 
     def newline(self):
@@ -61,29 +69,32 @@ class Parser:
             self.pop()
 
     def program(self):
+        first = self.t()
         body = []
         while self.t().type != tokenize.ENDMARKER:
             if self.t().type in (tokenize.NEWLINE, tokenize.DEDENT):
                 self.pop()
             else:
                 body.append(self.statement())
-        return self.located({"tipo": "Programa", "corpo": body}, self.ts[0])
+        return self.node("Programa", first, corpo=body)
 
     def statement(self):
         if self.v() == "if":
-            self.pop()
-            cond = self.expr()
+            start = self.pop()
+            condition = self.expr()
             body = self.suite()
             other = self.suite() if self.accept("else") else []
-            return self.located({"tipo": "Condicional", "condicao": cond, "corpo": body, "alternativa": other}, start)
+            return self.node("Condicional", start, condicao=condition, corpo=body, alternativa=other)
         if self.v() == "while":
-            self.pop()
-            return {"tipo": "Enquanto", "condicao": self.expr(), "corpo": self.suite()}
+            start = self.pop()
+            condition = self.expr()
+            return self.node("Enquanto", start, condicao=condition, corpo=self.suite())
         if self.v() == "for":
-            self.pop()
+            start = self.pop()
             target = self.need_type(tokenize.NAME, "identificador").string
             self.need("in", "Esperado 'in' após a variável do laço.")
-            return self.located({"tipo": "ParaCada", "alvo": target, "iteravel": self.expr(), "corpo": self.suite()}, start)
+            iterable = self.expr()
+            return self.node("ParaCada", start, alvo=target, iteravel=iterable, corpo=self.suite())
         return self.simple()
 
     def suite(self):
@@ -98,8 +109,8 @@ class Parser:
             return body
         self.pop()
         if self.t().type != tokenize.INDENT:
-            t = self.t()
-            raise ErroSintatico("Esperado bloco indentado após ':'.", t.start[0], t.start[1]+1)
+            tok = self.t()
+            raise ErroSintatico("Esperado bloco indentado após ':'.", tok.start[0], tok.start[1] + 1)
         self.pop()
         body = []
         while self.t().type not in (tokenize.DEDENT, tokenize.ENDMARKER):
@@ -112,53 +123,58 @@ class Parser:
         return body
 
     def simple(self):
+        start = self.t()
         if self.v() in ("pass", "break", "continue"):
             word = self.pop().string
             self.newline()
-            return {"tipo": word.capitalize()}
+            return self.node(word.capitalize(), start)
         if self.v() == "return":
             self.pop()
             value = None if self.t().type == tokenize.NEWLINE else self.expr()
             self.newline()
-            return {"tipo": "Retorno", "valor": value}
+            return self.node("Retorno", start, valor=value)
         left = self.expr()
         if self.v() in ("=", "+=", "-=", "*=", "/=", "//=", "%=", "**="):
             op = self.pop().string
             if left["tipo"] != "Identificador":
-                t = self.t()
-                raise ErroSintatico("Alvo de atribuição inválido.", t.start[0], t.start[1]+1)
+                tok = self.t()
+                raise ErroSintatico("Alvo de atribuição inválido.", tok.start[0], tok.start[1] + 1)
             right = self.expr()
             self.newline()
-            return self.located({"tipo": "Atribuicao", "alvo": left["nome"], "operador": op, "valor": right}, start)
+            return self.node("Atribuicao", start, alvo=left["nome"], operador=op, valor=right)
         self.newline()
-        return self.located({"tipo": "Expressao", "expressao": left}, start)
+        return self.node("Expressao", start, expressao=left)
 
     def expr(self, minp=0):
         left = self.prefix()
         while self.v() in self.BIN and self.BIN[self.v()][0] >= minp:
-            op = self.pop().string
+            op_tok = self.pop()
+            op = op_tok.string
             prec, name = self.BIN[op]
-            right = self.expr(prec if op == "**" else prec+1)
-            left = self.located({"tipo": "Binaria", "operador": name, "esquerda": left, "direita": right}, op_token)
+            # Potência associa à direita; os demais operadores à esquerda.
+            right = self.expr(prec if op == "**" else prec + 1)
+            left = self.node("Binaria", op_tok, operador=name, esquerda=left, direita=right)
         return left
 
     def prefix(self):
-        t = self.t()
-        if t.string in ("+", "-", "not"):
+        tok = self.t()
+        if tok.string in ("+", "-", "not"):
             op = self.pop().string
-            return {"tipo": "Unaria", "operador": op, "operando": self.expr(6)}
-        if t.type == tokenize.NUMBER:
+            # not tem precedência menor que comparações; sinais têm precedência alta.
+            operand = self.expr(3 if op == "not" else 6)
+            return self.node("Unaria", tok, operador=op, operando=operand)
+        if tok.type == tokenize.NUMBER:
             self.pop()
-            return self.located({"tipo": "Numero", "valor": t.string}, t)
-        if t.type == tokenize.STRING:
+            return self.node("Numero", tok, valor=tok.string)
+        if tok.type == tokenize.STRING:
             self.pop()
-            return self.located({"tipo": "Texto", "valor": t.string}, t)
-        if t.string in ("True", "False", "None"):
+            return self.node("Texto", tok, valor=tok.string)
+        if tok.string in ("True", "False", "None"):
             self.pop()
-            return self.located({"tipo": "Literal", "valor": t.string}, t)
-        if t.type == tokenize.NAME:
+            return self.node("Literal", tok, valor=tok.string)
+        if tok.type == tokenize.NAME:
             self.pop()
-            node = self.located({"tipo": "Identificador", "nome": t.string}, t)
+            node = self.node("Identificador", tok, nome=tok.string)
             while True:
                 if self.accept("("):
                     args = []
@@ -169,20 +185,21 @@ class Parser:
                                 break
                             args.append(self.expr())
                     self.need(")")
-                    node = self.located({"tipo": "Chamada", "funcao": node, "argumentos": args}, t)
+                    node = self.node("Chamada", tok, funcao=node, argumentos=args)
                 elif self.accept("["):
-                    idx = self.expr()
+                    index = self.expr()
                     self.need("]")
-                    node = self.located({"tipo": "Indice", "objeto": node, "indice": idx}, t)
+                    node = self.node("Indice", tok, objeto=node, indice=index)
                 elif self.accept("."):
-                    attr = self.need_type(tokenize.NAME, "atributo").string
-                    node = self.located({"tipo": "Atributo", "objeto": node, "nome": attr}, t)
+                    attr = self.need_type(tokenize.NAME, "nome do atributo").string
+                    node = self.node("Atributo", tok, objeto=node, nome=attr)
                 else:
-                    return node
-        if self.accept("("):
-            node = self.expr()
-            self.need(")")
+                    break
             return node
+        if self.accept("("):
+            expr = self.expr()
+            self.need(")")
+            return expr
         if self.accept("["):
             items = []
             if self.v() != "]":
@@ -192,9 +209,9 @@ class Parser:
                         break
                     items.append(self.expr())
             self.need("]")
-            return self.located({"tipo": "Lista", "itens": items}, t)
-        t = self.t()
-        raise ErroSintatico(f"Expressão inesperada: {t.string or 'fim do código'!r}.", t.start[0], t.start[1]+1)
+            return self.node("Lista", tok, itens=items)
+        raise ErroSintatico(f"Expressão inesperada: {tok.string or 'fim do código'!r}.",
+                            tok.start[0], tok.start[1] + 1)
 
 
 def parse(codigo):
