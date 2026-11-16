@@ -67,7 +67,7 @@ class Parser:
                 self.pop()
             else:
                 body.append(self.statement())
-        return {"tipo": "Programa", "corpo": body}
+        return self.located({"tipo": "Programa", "corpo": body}, self.ts[0])
 
     def statement(self):
         if self.v() == "if":
@@ -75,7 +75,7 @@ class Parser:
             cond = self.expr()
             body = self.suite()
             other = self.suite() if self.accept("else") else []
-            return {"tipo": "Condicional", "condicao": cond, "corpo": body, "alternativa": other}
+            return self.located({"tipo": "Condicional", "condicao": cond, "corpo": body, "alternativa": other}, start)
         if self.v() == "while":
             self.pop()
             return {"tipo": "Enquanto", "condicao": self.expr(), "corpo": self.suite()}
@@ -83,7 +83,7 @@ class Parser:
             self.pop()
             target = self.need_type(tokenize.NAME, "identificador").string
             self.need("in", "Esperado 'in' após a variável do laço.")
-            return {"tipo": "ParaCada", "alvo": target, "iteravel": self.expr(), "corpo": self.suite()}
+            return self.located({"tipo": "ParaCada", "alvo": target, "iteravel": self.expr(), "corpo": self.suite()}, start)
         return self.simple()
 
     def suite(self):
@@ -129,9 +129,9 @@ class Parser:
                 raise ErroSintatico("Alvo de atribuição inválido.", t.start[0], t.start[1]+1)
             right = self.expr()
             self.newline()
-            return {"tipo": "Atribuicao", "alvo": left["nome"], "operador": op, "valor": right}
+            return self.located({"tipo": "Atribuicao", "alvo": left["nome"], "operador": op, "valor": right}, start)
         self.newline()
-        return {"tipo": "Expressao", "expressao": left}
+        return self.located({"tipo": "Expressao", "expressao": left}, start)
 
     def expr(self, minp=0):
         left = self.prefix()
@@ -139,7 +139,7 @@ class Parser:
             op = self.pop().string
             prec, name = self.BIN[op]
             right = self.expr(prec if op == "**" else prec+1)
-            left = {"tipo": "Binaria", "operador": name, "esquerda": left, "direita": right}
+            left = self.located({"tipo": "Binaria", "operador": name, "esquerda": left, "direita": right}, op_token)
         return left
 
     def prefix(self):
@@ -149,16 +149,16 @@ class Parser:
             return {"tipo": "Unaria", "operador": op, "operando": self.expr(6)}
         if t.type == tokenize.NUMBER:
             self.pop()
-            return {"tipo": "Numero", "valor": t.string}
+            return self.located({"tipo": "Numero", "valor": t.string}, t)
         if t.type == tokenize.STRING:
             self.pop()
-            return {"tipo": "Texto", "valor": t.string}
+            return self.located({"tipo": "Texto", "valor": t.string}, t)
         if t.string in ("True", "False", "None"):
             self.pop()
-            return {"tipo": "Literal", "valor": t.string}
+            return self.located({"tipo": "Literal", "valor": t.string}, t)
         if t.type == tokenize.NAME:
             self.pop()
-            node = {"tipo": "Identificador", "nome": t.string}
+            node = self.located({"tipo": "Identificador", "nome": t.string}, t)
             while True:
                 if self.accept("("):
                     args = []
@@ -169,14 +169,14 @@ class Parser:
                                 break
                             args.append(self.expr())
                     self.need(")")
-                    node = {"tipo": "Chamada", "funcao": node, "argumentos": args}
+                    node = self.located({"tipo": "Chamada", "funcao": node, "argumentos": args}, t)
                 elif self.accept("["):
                     idx = self.expr()
                     self.need("]")
-                    node = {"tipo": "Indice", "objeto": node, "indice": idx}
+                    node = self.located({"tipo": "Indice", "objeto": node, "indice": idx}, t)
                 elif self.accept("."):
                     attr = self.need_type(tokenize.NAME, "atributo").string
-                    node = {"tipo": "Atributo", "objeto": node, "nome": attr}
+                    node = self.located({"tipo": "Atributo", "objeto": node, "nome": attr}, t)
                 else:
                     return node
         if self.accept("("):
@@ -192,7 +192,7 @@ class Parser:
                         break
                     items.append(self.expr())
             self.need("]")
-            return {"tipo": "Lista", "itens": items}
+            return self.located({"tipo": "Lista", "itens": items}, t)
         t = self.t()
         raise ErroSintatico(f"Expressão inesperada: {t.string or 'fim do código'!r}.", t.start[0], t.start[1]+1)
 
