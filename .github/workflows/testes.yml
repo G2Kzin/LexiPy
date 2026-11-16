@@ -45,6 +45,10 @@ jobs:
           done
           docker compose logs
           exit 1
+      - name: Testar interface e endpoint integrado
+        run: |
+          curl --fail http://localhost:8080/ | grep -q 'LexiPy'
+          curl --fail -X POST http://localhost:8080/api/analisar -H 'Content-Type: application/json' -d '{"codigo":"x = 2 + 3 * 4"}' | grep -q '"sintaxe_sucesso":true'
       - name: Executar testes dentro do container
         run: docker compose exec -T backend python -m pytest -v
       - name: Encerrar serviços
