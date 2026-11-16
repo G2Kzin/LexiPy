@@ -30,3 +30,19 @@ def test_lexical_error_prevents_syntax_analysis():
     assert data["sucesso"] is False
     assert data["sintaxe_sucesso"] is None
     assert data["status"] == "lexical_errors"
+
+def test_empty_code_is_rejected():
+    response = client.post("/api/analisar", json={"codigo": "   \n "})
+    assert response.status_code == 422
+
+
+def test_missing_field_is_rejected():
+    response = client.post("/api/analisar", json={})
+    assert response.status_code == 422
+
+
+def test_token_positions_are_present():
+    response = client.post("/api/analisar", json={"codigo": "\n  valor = 3"})
+    token = next(t for t in response.json()["tokens"] if t["lexema"] == "valor")
+    assert token["linha"] == 2
+    assert token["coluna"] == 3
