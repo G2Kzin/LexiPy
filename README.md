@@ -24,7 +24,7 @@ A AST é uma estrutura de dicionários serializável em JSON. O analisador não 
 - `backend/tests/test_api.py`: testes de integração da API.
 - `frontend/index.html`: interface para tokens, erros sintáticos e AST.
 - `docker-compose.yml`: orquestração da aplicação.
-- `docs/gramatica-sintatica.md`: gramática e limitações.
+- `docs/gramatica-sintatica.md`: gramática e limitações.\n- `docs/materiais-metodos-etapa4.md`: procedimento, fluxo e critérios de avaliação.
 - `docs/escopo-lexico.md`: escopo do scanner.
 
 ## Executar
