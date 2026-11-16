@@ -46,7 +46,7 @@ jobs:
           docker compose logs
           exit 1
       - name: Executar testes dentro do container
-        run: docker compose exec -T backend pytest -v
+        run: docker compose exec -T backend python -m pytest -v
       - name: Encerrar serviços
         if: always()
         run: docker compose down -v
