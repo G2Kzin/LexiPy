@@ -7,7 +7,7 @@ on:
     branches: ["main"]
 
 jobs:
-  testes:
+  testes-python:
     runs-on: ubuntu-latest
     steps:
       - name: Obter código
@@ -25,3 +25,28 @@ jobs:
         env:
           PYTHONPATH: .
         run: python -m pytest -v
+
+  validacao-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter código
+        uses: actions/checkout@v4
+      - name: Validar configuração Compose
+        run: docker compose config
+      - name: Construir e iniciar serviços
+        run: docker compose up --build -d
+      - name: Aguardar backend saudável
+        run: |
+          for i in $(seq 1 20); do
+            if docker compose exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"; then
+              exit 0
+            fi
+            sleep 3
+          done
+          docker compose logs
+          exit 1
+      - name: Executar testes dentro do container
+        run: docker compose exec -T backend pytest -v
+      - name: Encerrar serviços
+        if: always()
+        run: docker compose down -v
