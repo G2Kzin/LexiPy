@@ -1,81 +1,162 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LexiPy — Análise Léxica</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<title>LexiPy — Laboratório de Compiladores</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#121a2d;--line:#293650;--text:#edf2ff;--muted:#a8b4cc;--accent:#8aa4ff;--green:#67e8b0;--red:#ff9baf}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#182647 0,#0b1020 55%);font:16px/1.5 system-ui,sans-serif;color:var(--text)}
-.wrap{max-width:1240px;margin:auto;padding:30px 18px 50px}.top{display:flex;align-items:center;gap:14px;margin-bottom:26px}.logo{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#7898ff,#8b5cf6);font-weight:900;font-size:21px}.top h1{margin:0;font-size:25px}.top p,.muted,label{color:var(--muted);font-size:13px}.top p{margin:2px 0}.hero{margin:18px 0 24px}.eyebrow{color:var(--green);font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:800}.hero h2{font-size:clamp(28px,4vw,40px);line-height:1.12;margin:8px 0;max-width:800px}.hero p{max-width:800px;color:var(--muted);margin:0}.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px}.panel{background:rgba(18,26,45,.94);border:1px solid var(--line);border-radius:17px;padding:18px;min-width:0}.panel h3{margin:0 0 14px;font-size:17px}.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:9px}select,textarea{width:100%;border:1px solid #34425e;background:#0b1222;color:var(--text);border-radius:10px;padding:12px;font:inherit}select{margin-bottom:14px}textarea{min-height:285px;resize:vertical;font:14px/1.6 ui-monospace,Consolas,monospace;tab-size:4}button{border:0;border-radius:10px;padding:11px 15px;font-weight:750;cursor:pointer}.primary{background:var(--accent);color:#091126}.secondary{background:#222e48;color:var(--text);border:1px solid #3a4b6b}.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:13px}.status{font-size:12px;color:var(--muted)}button:disabled{opacity:.55;cursor:wait}.pill{display:inline-block;background:#1b2942;color:#b9caff;border:1px solid #34496e;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:750}.intro{color:var(--muted);font-size:13px;margin:-4px 0 12px}.table-wrap{overflow:auto;max-height:290px;border:1px solid #293650;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:12px;text-align:left}th,td{padding:8px 9px;border-bottom:1px solid #293650;white-space:nowrap}th{position:sticky;top:0;background:#1b2942;color:#dce5ff}td code{font-family:ui-monospace,Consolas,monospace;color:#c7d2fe}.empty{color:var(--muted);padding:18px;border:1px dashed #34425e;border-radius:10px;font-size:13px}.error{border:1px solid #7e394b;background:#301b24;color:#ffd5dc;border-radius:10px;padding:12px;margin:8px 0;font-size:13px}.error code{color:#ffb9c6}.summary{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.stat{background:#0b1222;border:1px solid #293650;border-radius:9px;padding:7px 10px;font-size:12px;color:var(--muted)}.stat b{color:var(--text)}.definition{font-size:12px;color:var(--muted);margin:14px 0 0}.feature{padding:10px 0;border-bottom:1px solid #27334b;font-size:13px;color:var(--muted)}.feature strong{color:var(--text)}.foot{margin-top:18px;color:#8290ab;font-size:12px}@media(max-width:850px){.layout{grid-template-columns:1fr}.wrap{padding:20px 12px}textarea{min-height:220px}}
+:root{color-scheme:dark;--bg:#080d19;--surface:#101a2c;--surface-2:#142139;--line:#263753;--text:#edf3ff;--muted:#9aabc5;--blue:#8ba8ff;--cyan:#67d9e8;--green:#6ee7b7;--red:#fb8fa4;--amber:#f7c979}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#243b68 0,transparent 55%),var(--bg);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text)}
+button,select,textarea{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(1440px,100%);margin:auto;padding:28px 24px 42px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:38px}
+.brand{display:flex;align-items:center;gap:13px}.logo{display:grid;place-items:center;width:48px;height:48px;border:1px solid #91aaff55;border-radius:15px;background:linear-gradient(145deg,#7899ff,#7557c8);box-shadow:0 8px 30px #647eff33;font-weight:900;font-size:20px;color:white}
+.brand h1{font-size:21px;letter-spacing:-.5px;margin:0}.brand p{margin:1px 0 0;color:var(--muted);font-size:12px}
+.connection{display:flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:#101a2c;color:var(--muted);font-size:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px #f7c97918}.dot.online{background:var(--green);box-shadow:0 0 0 4px #6ee7b718}.dot.offline{background:var(--red);box-shadow:0 0 0 4px #fb8fa418}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:24px;margin:0 0 25px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan)}.hero h2{font-size:clamp(27px,4vw,42px);line-height:1.12;letter-spacing:-1.3px;max-width:780px;margin:9px 0 10px}.hero p{max-width:760px;color:var(--muted);margin:0;font-size:14px}.hero-tag{white-space:nowrap;border:1px solid #354d77;background:#172743;color:#bfd0ff;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:800;letter-spacing:.06em}
+.pipeline{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}.stage{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:13px;background:#0e1829}.stage-num{display:grid;place-items:center;width:30px;height:30px;flex:none;border-radius:9px;background:#1d3153;color:#b9cbff;font-size:12px;font-weight:800}.stage strong{display:block;font-size:12px}.stage span:last-child{font-size:11px;color:var(--muted)}
+.workspace{display:grid;grid-template-columns:minmax(320px,.88fr) minmax(0,1.12fr);gap:17px;align-items:start}.panel{min-width:0;border:1px solid var(--line);border-radius:17px;background:linear-gradient(180deg,#121e32f5,#0e1829f5);box-shadow:0 14px 40px #0002;overflow:hidden}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 19px;border-bottom:1px solid var(--line)}.panel-title{display:flex;align-items:center;gap:10px}.panel-index{color:var(--cyan);font:800 11px ui-monospace,monospace}.panel h3{font-size:14px;margin:0;letter-spacing:.01em}.panel-body{padding:18px}
+.field-label{display:block;margin:0 0 8px;color:#bdcbe0;font-size:12px;font-weight:700}
+select,textarea{width:100%;border:1px solid #304361;background:#091323;color:var(--text);border-radius:10px;outline:none;transition:border-color .18s,box-shadow .18s}
+select{padding:11px 13px;margin-bottom:17px}select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #8ba8ff20}
+.editor-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}.editor-top .field-label{margin:0}.counter{font:11px ui-monospace,monospace;color:#8193b0}
+textarea{display:block;min-height:320px;resize:vertical;padding:15px;font:13px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:4;white-space:pre;caret-color:var(--cyan)}
+.editor-hint{margin:8px 0 0;color:#8193b0;font-size:11px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;border:1px solid transparent;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:800;transition:transform .15s,filter .15s}.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}.btn:disabled{opacity:.55;cursor:wait;transform:none}.primary{background:linear-gradient(135deg,#9ab4ff,#7896f5);color:#091326;box-shadow:0 5px 18px #7896f533}.secondary{background:#1b2a43;border-color:#354866;color:#dce7ff}.statusline{display:flex;align-items:center;gap:8px;margin-top:13px;color:var(--muted);font-size:11px}.statusline .dot{width:7px;height:7px}
+.result-badge{padding:5px 9px;border:1px solid #354866;border-radius:999px;background:#172743;color:#c2d2f6;font-size:10px;font-weight:850;letter-spacing:.06em}.result-badge.good{border-color:#286c59;background:#12372f;color:var(--green)}.result-badge.bad{border-color:#78394a;background:#351b28;color:#ffb3c0}
+.results-body{padding:16px 18px 19px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:17px}.stat{padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#0a1424}.stat span{display:block;color:var(--muted);font-size:10px}.stat strong{display:block;margin-top:2px;font-size:21px;letter-spacing:-.5px}.stat:nth-child(1) strong{color:var(--blue)}.stat:nth-child(2) strong{color:var(--green)}.stat:nth-child(3) strong{color:var(--amber)}
+.result-section{margin-top:16px}.section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}.section-heading h4{font-size:12px;margin:0}.section-note{font-size:10px;color:#8193b0}.result-box{min-height:50px;border:1px solid var(--line);border-radius:11px;background:#0a1424;overflow:hidden}.placeholder{padding:15px;color:#8293ae;font-size:12px}.table-wrap{max-height:260px;overflow:auto}table{width:100%;border-collapse:collapse;text-align:left;font-size:11px}th,td{padding:9px 10px;border-bottom:1px solid #22324b;white-space:nowrap}th{position:sticky;top:0;background:#172640;color:#b9c9e4;font-size:10px;text-transform:uppercase;letter-spacing:.06em}td{color:#d7e2f5}tbody tr:hover{background:#14233a}td code{color:#a9bcff;font:11px ui-monospace,monospace}
+.error-item{padding:11px 13px;border-bottom:1px solid #542d3b;background:#241722;color:#ffd4dc;font-size:11px}.error-item:last-child{border-bottom:0}.error-item b{color:#ff9fb1}.error-item code{color:#ffc0cb}
+.syntax-ok{padding:12px 13px;color:#a8f2d5;background:#102c28;font-size:12px}.syntax-fail{padding:12px 13px;color:#ffd4dc;background:#281923;font-size:12px}.syntax-wait{padding:12px 13px;color:var(--muted);font-size:12px}
+.ast-wrap{position:relative}.ast-wrap pre{margin:0;max-height:340px;overflow:auto;padding:14px;color:#c7d7f5;font:11px/1.65 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}.copy-btn{border:1px solid #354866;border-radius:7px;background:#182943;color:#c4d4f3;padding:5px 8px;font-size:10px;font-weight:700}
+.footer{display:flex;justify-content:space-between;gap:16px;margin-top:18px;color:#7486a2;font-size:10px}.footer strong{color:#9aabc5}
+@media(max-width:980px){.workspace{grid-template-columns:1fr}.hero{align-items:start;flex-direction:column}.hero-tag{white-space:normal}.pipeline{grid-template-columns:1fr}}
+@media(max-width:560px){.wrap{padding:18px 12px 30px}.topbar{margin-bottom:28px}.connection{font-size:0;padding:10px}.connection .dot{margin:0}.brand p{font-size:10px}.panel-body,.results-body{padding:14px}.stats{gap:6px}.stat{padding:9px}.stat strong{font-size:18px}.footer{flex-direction:column}.hero h2{font-size:29px}}
 </style>
 </head>
-<body><main class="wrap">
-<header class="top"><div class="logo">Lx</div><div><h1>LexiPy</h1><p>Laboratório educacional de compiladores · Análise léxica de Python</p></div></header>
-<section class="hero"><div class="eyebrow">Etapa 4 · Análise léxica e sintática</div><h2>Veja como o código se transforma em tokens e em uma árvore sintática.</h2><p>Escreva ou selecione um exemplo. O scanner identifica lexemas, categorias e posições sem executar o programa. Erros léxicos são apresentados com linha e coluna.</p></section>
-<div class="layout">
-<section class="panel"><div class="row"><h3>01 / Código-fonte</h3><span class="pill">PYTHON — SUBCONJUNTO</span></div>
-<label for="examples">Carregar exemplo</label><select id="examples"><option value="">Escolha um exemplo…</option><option value="hello">Saída de texto</option><option value="variable">Variáveis e números</option><option value="condition">Condicional</option><option value="error">Exemplo com erro léxico</option></select>
-<div class="row"><label for="source">Edite o código</label><span id="counter" class="muted">0 caracteres</span></div>
-<textarea id="source" spellcheck="false" aria-label="Código-fonte Python">nome = "Ana"
+<body>
+<main class="wrap">
+<header class="topbar">
+ <div class="brand"><div class="logo">Lx</div><div><h1>LexiPy</h1><p>Laboratório educacional de compiladores</p></div></div>
+ <div class="connection"><span id="connectionDot" class="dot"></span><span id="connectionText">Verificando conexão…</span></div>
+</header>
+<section class="hero">
+ <div><div class="eyebrow">Ambiente de aprendizagem · Etapa 04</div><h2>Do código à estrutura sintática.</h2><p>Explore como um compilador reconhece os elementos de um programa. Escreva um trecho de código, execute a análise e acompanhe os tokens, os diagnósticos e a árvore sintática abstrata.</p></div>
+ <div class="hero-tag">PYTHON · SUBCONJUNTO DIDÁTICO</div>
+</section>
+<section class="pipeline" aria-label="Etapas da análise">
+ <div class="stage"><span class="stage-num">01</span><div><strong>Análise léxica</strong><span>Reconhecimento dos tokens</span></div></div>
+ <div class="stage"><span class="stage-num">02</span><div><strong>Análise sintática</strong><span>Verificação da estrutura</span></div></div>
+ <div class="stage"><span class="stage-num">03</span><div><strong>Árvore sintática (AST)</strong><span>Representação do programa</span></div></div>
+</section>
+<div class="workspace">
+<section class="panel">
+ <div class="panel-head"><div class="panel-title"><span class="panel-index">01 /</span><h3>Código-fonte</h3></div><span class="result-badge">EDITOR</span></div>
+ <div class="panel-body">
+  <label class="field-label" for="examples">Comece por um exemplo</label>
+  <select id="examples"><option value="">Selecionar exemplo…</option><option value="hello">Olá, mundo</option><option value="variable">Variáveis e números</option><option value="condition">Estrutura condicional</option><option value="loop">Laço de repetição</option><option value="error">Exemplo com erro léxico</option><option value="syntax">Exemplo com erro sintático</option></select>
+  <div class="editor-top"><label class="field-label" for="source">Edite seu código</label><span id="counter" class="counter">0 caracteres</span></div>
+  <textarea id="source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Código-fonte Python">nome = "Ana"
 idade = 20
+
 if idade >= 18:
     print(nome, "maior de idade")</textarea>
-<div class="actions"><button id="analyze" class="primary">▶ Analisar tokens</button><button id="clear" class="secondary">Limpar</button><span id="status" class="status" role="status" aria-live="polite">Pronto para analisar.</span></div>
-<p class="definition"><b>Token</b>: unidade categorizada reconhecida pelo scanner. <b>Lexema</b>: trecho literal do código que corresponde ao token.</p>
+  <p class="editor-hint">Dica: experimente alterar os valores ou remover um símbolo para observar os diagnósticos.</p>
+  <div class="actions"><button id="analyze" class="btn primary">▶ &nbsp; Analisar código</button><button id="clear" class="btn secondary">Limpar editor</button></div>
+  <div class="statusline"><span id="statusDot" class="dot"></span><span id="status" role="status" aria-live="polite">Pronto para analisar.</span></div>
+ </div>
 </section>
-<section class="panel"><div class="row"><h3>02 / Resultado da análise</h3><span id="resultBadge" class="pill">AGUARDANDO</span></div>
-<div class="summary" id="summary"><span class="stat">Os contadores aparecerão aqui.</span></div>
-<h3>Tokens identificados</h3><div id="tokens" class="empty">Solicite uma análise para ver os tokens.</div>
-<h3 style="margin-top:18px">Erros léxicos</h3><div id="errors" class="empty">Nenhum resultado ainda.</div><h3 style="margin-top:18px">Análise sintática</h3><div id="syntax" class="empty">A AST e os erros sintáticos aparecerão aqui.</div><h3 style="margin-top:18px">Árvore sintática abstrata (AST)</h3><pre id="ast" class="empty" style="white-space:pre-wrap;overflow:auto;max-height:340px">Nenhuma AST disponível.</pre>
-<div class="feature"><strong>Como ler o resultado:</strong> cada linha mostra o tipo do token, o lexema e a posição inicial (linha e coluna).</div>
-</section></div>
-<footer class="foot">LexiPy · Projeto educacional · O código enviado é tratado como texto e nunca é executado. A análise sintática constrói uma AST para o subconjunto documentado.</footer>
+<section class="panel">
+ <div class="panel-head"><div class="panel-title"><span class="panel-index">02 /</span><h3>Resultado da análise</h3></div><span id="resultBadge" class="result-badge">AGUARDANDO</span></div>
+ <div class="results-body">
+  <div class="stats" id="summary">
+   <div class="stat"><span>Tokens</span><strong>—</strong></div><div class="stat"><span>Erros léxicos</span><strong>—</strong></div><div class="stat"><span>Linhas</span><strong>—</strong></div>
+  </div>
+  <section class="result-section"><div class="section-heading"><h4>Tokens identificados</h4><span class="section-note">TIPO · LEXEMA · POSIÇÃO</span></div><div id="tokens" class="result-box"><div class="placeholder">Os tokens aparecerão aqui após a análise.</div></div></section>
+  <section class="result-section"><div class="section-heading"><h4>Diagnóstico léxico</h4><span class="section-note">SCANNER</span></div><div id="errors" class="result-box"><div class="placeholder">Nenhum resultado disponível.</div></div></section>
+  <section class="result-section"><div class="section-heading"><h4>Diagnóstico sintático</h4><span class="section-note">PARSER</span></div><div id="syntax" class="result-box"><div class="placeholder">A situação da análise sintática será exibida aqui.</div></div></section>
+  <section class="result-section"><div class="section-heading"><h4>Árvore sintática abstrata</h4><button id="copyAst" class="copy-btn" disabled>Copiar JSON</button></div><div class="result-box ast-wrap"><pre id="ast">A AST será exibida quando a análise sintática for concluída com sucesso.</pre></div></section>
+ </div>
+</section>
+</div>
+<footer class="footer"><span><strong>LexiPy</strong> · Projeto educacional de compiladores</span><span>O código é analisado como texto e não é executado. Gramática limitada ao subconjunto documentado.</span></footer>
 </main>
 <script>
 const examples={
  hello:'print("Olá, mundo!")',
  variable:'nome = "Felipe"\nidade = 20\nnota = 8.5\nprint(nome, idade, nota)',
  condition:'numero = 10\nif numero >= 0:\n    print("Não negativo")\nelse:\n    print("Negativo")',
- error:'valor = 10\nresultado = valor @ 2\nprint(resultado)'
+ loop:'contador = 0\nwhile contador < 3:\n    print(contador)\n    contador = contador + 1',
+ error:'valor = 10\nresultado = valor @ 2\nprint(resultado)',
+ syntax:'valor = 10\nresultado = valor +\nprint(resultado)'
 };
 const $=s=>document.querySelector(s);
 const source=$('#source'), select=$('#examples'), counter=$('#counter'), status=$('#status');
-function count(){counter.textContent=`${source.value.length} caracteres · ${source.value.split('\n').length} linha(s)`}
-source.addEventListener('input',count);count();
-select.addEventListener('change',()=>{if(select.value){source.value=examples[select.value];count();status.textContent='Exemplo carregado; você pode editá-lo.'}});
-$('#clear').addEventListener('click',()=>{source.value='';select.value='';count();source.focus();status.textContent='Campo limpo.';$('#tokens').className='empty';$('#tokens').textContent='Solicite uma análise para ver os tokens.';$('#errors').className='empty';$('#errors').textContent='Nenhum resultado ainda.';$('#summary').textContent='';$('#syntax').className='empty';$('#syntax').textContent='A AST e os erros sintáticos aparecerão aqui.';$('#ast').textContent='Nenhuma AST disponível.';$('#resultBadge').textContent='AGUARDANDO'});
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function renderTokens(tokens){
- if(!tokens.length){$('#tokens').className='empty';$('#tokens').textContent='Nenhum token foi identificado.';return}
- const counts={};tokens.forEach(t=>counts[t.tipo]=(counts[t.tipo]||0)+1);
- $('#summary').innerHTML=`<span class="stat"><b>${tokens.length}</b> tokens</span>`+Object.entries(counts).map(([k,v])=>`<span class="stat">${esc(k)}: <b>${v}</b></span>`).join('');
- $('#tokens').className='table-wrap';
- $('#tokens').innerHTML='<table><thead><tr><th>Tipo</th><th>Lexema</th><th>Linha</th><th>Coluna</th></tr></thead><tbody>'+tokens.map(t=>`<tr><td>${esc(t.tipo)}</td><td><code>${esc(t.lexema)}</code></td><td>${t.linha}</td><td>${t.coluna}</td></tr>`).join('')+'</tbody></table>';
+let lastAst=null;
+function count(){counter.textContent=source.value.length+' caracteres · '+(source.value.split('\n').length)+' linha(s)'}
+function setStatus(message,type){status.textContent=message;const dot=$('#statusDot');dot.className='dot'+(type==='ok'?' online':type==='error'?' offline':'')}
+function resetResults(){
+ $('#summary').innerHTML='<div class="stat"><span>Tokens</span><strong>—</strong></div><div class="stat"><span>Erros léxicos</span><strong>—</strong></div><div class="stat"><span>Linhas</span><strong>—</strong></div>';
+ $('#tokens').innerHTML='<div class="placeholder">Os tokens aparecerão aqui após a análise.</div>';
+ $('#errors').innerHTML='<div class="placeholder">Nenhum resultado disponível.</div>';
+ $('#syntax').innerHTML='<div class="placeholder">A situação da análise sintática será exibida aqui.</div>';
+ $('#ast').textContent='A AST será exibida quando a análise sintática for concluída com sucesso.';
+ $('#resultBadge').textContent='AGUARDANDO';$('#resultBadge').className='result-badge';
+ $('#copyAst').disabled=true;lastAst=null;
 }
-function renderSyntax(data){
- const box=$('#syntax');
- if(data.sintaxe_sucesso===true){box.className='empty';box.textContent='Sintaxe válida para o subconjunto implementado.';$('#ast').textContent=JSON.stringify(data.ast,null,2)}
- else if(data.sintaxe_sucesso===false){box.className='';box.innerHTML=(data.erros_sintaticos||[]).map(e=>`<div class="error"><b>Linha ${e.linha}, coluna ${e.coluna}:</b> ${esc(e.mensagem)}</div>`).join('');$('#ast').textContent='AST não gerada porque há erros sintáticos.'}
- else {box.className='empty';box.textContent='A análise sintática não foi executada devido a erro léxico.';$('#ast').textContent='AST indisponível.'}
+source.addEventListener('input',count);count();
+select.addEventListener('change',()=>{if(select.value){source.value=examples[select.value];count();setStatus('Exemplo carregado. Você pode editá-lo.');source.focus()}});
+$('#clear').addEventListener('click',()=>{source.value='';select.value='';count();resetResults();source.focus();setStatus('Editor limpo.')});
+function esc(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderTokens(tokens){
+ const counts={};tokens.forEach(t=>counts[t.tipo]=(counts[t.tipo]||0)+1);
+ $('#summary').innerHTML='<div class="stat"><span>Tokens identificados</span><strong>'+tokens.length+'</strong></div><div class="stat"><span>Erros léxicos</span><strong>'+($('#errors').querySelectorAll('.error-item').length)+'</strong></div><div class="stat"><span>Linhas analisadas</span><strong>'+source.value.split('\n').length+'</strong></div>';
+ if(!tokens.length){$('#tokens').innerHTML='<div class="placeholder">Nenhum token foi identificado.</div>';return}
+ $('#tokens').innerHTML='<div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Lexema</th><th>Linha</th><th>Coluna</th></tr></thead><tbody>'+tokens.map(t=>'<tr><td>'+esc(t.tipo)+'</td><td><code>'+esc(t.lexema)+'</code></td><td>'+t.linha+'</td><td>'+t.coluna+'</td></tr>').join('')+'</tbody></table></div>';
 }
 function renderErrors(errors){
- if(!errors.length){$('#errors').className='empty';$('#errors').textContent='Nenhum erro léxico encontrado.';return}
- $('#errors').className='';$('#errors').innerHTML=errors.map(e=>`<div class="error"><b>Linha ${e.linha}, coluna ${e.coluna}:</b> ${esc(e.mensagem)}<br>Trecho: <code>${esc(e.lexema)}</code></div>`).join('');
+ if(!errors.length){$('#errors').innerHTML='<div class="placeholder">✓ Nenhum erro léxico encontrado.</div>';return}
+ $('#errors').innerHTML=errors.map(e=>'<div class="error-item"><b>Linha '+e.linha+', coluna '+e.coluna+':</b> '+esc(e.mensagem)+'<br>Trecho: <code>'+esc(e.lexema)+'</code></div>').join('');
 }
-async function checkApi(){try{const r=await fetch('/api/health');if(!r.ok)throw Error();status.textContent='Backend conectado.'}catch{status.textContent='Backend indisponível; verifique o Docker Compose.'}}
+function renderSyntax(data){
+ if(data.sintaxe_sucesso===true){
+  $('#syntax').innerHTML='<div class="syntax-ok">✓ Sintaxe válida para o subconjunto implementado. A árvore sintática foi construída.</div>';
+  lastAst=data.ast;$('#ast').textContent=JSON.stringify(data.ast,null,2);$('#copyAst').disabled=false;
+ }else if(data.sintaxe_sucesso===false){
+  $('#syntax').innerHTML=(data.erros_sintaticos||[]).map(e=>'<div class="syntax-fail"><b>Linha '+e.linha+', coluna '+e.coluna+':</b> '+esc(e.mensagem)+'</div>').join('');
+  $('#ast').textContent='AST não gerada porque foram encontrados erros sintáticos.';lastAst=null;$('#copyAst').disabled=true;
+ }else{
+  $('#syntax').innerHTML='<div class="syntax-wait">Análise sintática não executada: corrija primeiro os erros léxicos.</div>';
+  $('#ast').textContent='AST indisponível devido a erros léxicos.';lastAst=null;$('#copyAst').disabled=true;
+ }
+}
+async function checkApi(){
+ try{const r=await fetch('/api/health');if(!r.ok)throw Error();$('#connectionDot').className='dot online';$('#connectionText').textContent='Backend conectado';}
+ catch{$('#connectionDot').className='dot offline';$('#connectionText').textContent='Backend indisponível';setStatus('Não foi possível conectar à API. Verifique o Docker Compose.','error')}
+}
 checkApi();
+$('#copyAst').addEventListener('click',async()=>{if(lastAst===null)return;try{await navigator.clipboard.writeText(JSON.stringify(lastAst,null,2));setStatus('JSON da AST copiado.','ok')}catch{setStatus('Não foi possível copiar automaticamente.','error')}});
 $('#analyze').addEventListener('click',async()=>{
  const codigo=source.value;
- if(!codigo.trim()){status.textContent='Entrada vazia.';$('#resultBadge').textContent='SEM CÓDIGO';$('#errors').className='error';$('#errors').textContent='Informe um código-fonte antes de analisar.';return}
- const btn=$('#analyze');btn.disabled=true;status.textContent='Analisando…';
+ if(!codigo.trim()){setStatus('Informe um código-fonte antes de analisar.','error');$('#resultBadge').textContent='SEM CÓDIGO';$('#resultBadge').className='result-badge bad';$('#errors').innerHTML='<div class="error-item">O editor está vazio. Digite ou selecione um exemplo.</div>';return}
+ const btn=$('#analyze');btn.disabled=true;btn.textContent='Analisando…';setStatus('Enviando código para análise.');
  try{
-  const r=await fetch('/api/analisar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigo})});
-  const data=await r.json();if(!r.ok)throw Error(data.detail||'Não foi possível analisar o código.');
+  const response=await fetch('/api/analisar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigo})});
+  const data=await response.json();if(!response.ok)throw Error(data.detail||'Não foi possível analisar o código.');
   renderTokens(data.tokens||[]);renderErrors(data.erros||[]);renderSyntax(data);
-  $('#resultBadge').textContent=data.sucesso?'ANÁLISE OK':'COM ERROS';
-  $('#resultBadge').style.color=data.sucesso?'#67e8b0':'#ff9baf';
-  status.textContent=data.sucesso?'Análise concluída sem erros.':'Análise concluída; revise os erros abaixo.';
- }catch(e){status.textContent=e.message;$('#errors').className='error';$('#errors').textContent=e.message}
- finally{btn.disabled=false}
+  const lexicalOk=!!data.sucesso, syntaxOk=data.sintaxe_sucesso===true;
+  const overallOk=lexicalOk&&syntaxOk;
+  $('#resultBadge').textContent=overallOk?'ANÁLISE CONCLUÍDA':'REVISAR DIAGNÓSTICOS';
+  $('#resultBadge').className='result-badge '+(overallOk?'good':'bad');
+  $('#summary').querySelector('.stat:nth-child(2) strong').textContent=(data.erros||[]).length;
+  setStatus(overallOk?'Análise léxica e sintática concluídas sem erros.':'Análise finalizada. Consulte os diagnósticos. ',overallOk?'ok':'error');
+ }catch(error){setStatus(error.message,'error');$('#resultBadge').textContent='FALHA';$('#resultBadge').className='result-badge bad';$('#errors').innerHTML='<div class="error-item">'+esc(error.message)+'</div>'}
+ finally{btn.disabled=false;btn.textContent='▶  Analisar código'}
 });
-</script></body></html>
+</script>
+</body>
+</html>
