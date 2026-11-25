@@ -129,13 +129,13 @@ function renderAstNode(node,key='Raiz'){if(node===null||node===undefined)return 
 function renderSyntax(data){
  if(data.sintaxe_sucesso===true){
   $('#syntax').innerHTML='<div class="syntax-ok">✓ Sintaxe válida para o subconjunto implementado. A árvore sintática foi construída.</div>';
-  lastAst=data.ast;$('#ast').textContent=JSON.stringify(data.ast,null,2);$('#astTree').innerHTML=renderAstNode(data.ast,'Programa');$('#copyAst').disabled=false;$('#intermediate').innerHTML='<pre class="intermediate-code">'+esc((data.codigo_intermediario||[]).join('\n')||'Nenhuma instrução intermediária foi gerada.')+'</pre>';
+  lastAst=data.ast;$('#ast').hidden=true;$('#astTree').hidden=false;$('#toggleAst').textContent='Ver JSON';$('#ast').textContent=JSON.stringify(data.ast,null,2);$('#astTree').innerHTML=renderAstNode(data.ast,'Programa');$('#copyAst').disabled=false;$('#intermediate').innerHTML='<pre class="intermediate-code">'+esc((data.codigo_intermediario||[]).join('\n')||'Nenhuma instrução intermediária foi gerada.')+'</pre>';
  }else if(data.sintaxe_sucesso===false){
-  $('#syntax').innerHTML=(data.erros_sintaticos||[]).map(e=>'<div class="syntax-fail"><b>Linha '+e.linha+', coluna '+e.coluna+':</b> '+esc(e.mensagem)+'</div>').join('');
-  $('#ast').textContent='AST não gerada porque foram encontrados erros sintáticos.';$('#astTree').innerHTML='<div class="tree-empty">Corrija os erros sintáticos para visualizar a AST.</div>';$('#intermediate').innerHTML='<div class="placeholder">O código intermediário depende de uma AST válida.</div>';lastAst=null;$('#copyAst').disabled=true;
+  $('#syntax').innerHTML=(data.erros_sintaticos||[]).map(e=>'<div class="syntax-fail"><b>Linha '+e.linha+', coluna '+e.coluna+':</b> '+esc(e.mensagem)+'</div>'+diagnosticLocation(e.linha,e.coluna)).join('');
+  $('#ast').hidden=true;$('#astTree').hidden=false;$('#toggleAst').textContent='Ver JSON';$('#ast').textContent='AST não gerada porque foram encontrados erros sintáticos.';$('#astTree').innerHTML='<div class="tree-empty">Corrija os erros sintáticos para visualizar a AST.</div>';$('#intermediate').innerHTML='<div class="placeholder">O código intermediário depende de uma AST válida.</div>';lastAst=null;$('#copyAst').disabled=true;
  }else{
   $('#syntax').innerHTML='<div class="syntax-wait">Análise sintática não executada: corrija primeiro os erros léxicos.</div>';
-  $('#ast').textContent='AST indisponível devido a erros léxicos.';$('#astTree').innerHTML='<div class="tree-empty">Corrija os erros léxicos para visualizar a AST.</div>';$('#intermediate').innerHTML='<div class="placeholder">O código intermediário depende de uma AST válida.</div>';lastAst=null;$('#copyAst').disabled=true;
+  $('#ast').hidden=true;$('#astTree').hidden=false;$('#toggleAst').textContent='Ver JSON';$('#ast').textContent='AST indisponível devido a erros léxicos.';$('#astTree').innerHTML='<div class="tree-empty">Corrija os erros léxicos para visualizar a AST.</div>';$('#intermediate').innerHTML='<div class="placeholder">O código intermediário depende de uma AST válida.</div>';lastAst=null;$('#copyAst').disabled=true;
  }
 }
 async function checkApi(){
