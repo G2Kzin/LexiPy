@@ -106,7 +106,7 @@ function resetResults(){
  $('#tokens').innerHTML='<div class="placeholder">Os tokens aparecerão aqui após a análise.</div>';
  $('#errors').innerHTML='<div class="placeholder">Nenhum resultado disponível.</div>';
  $('#syntax').innerHTML='<div class="placeholder">A situação da análise sintática será exibida aqui.</div>';
- $('#ast').textContent='A AST será exibida quando a análise sintática for concluída com sucesso.';$('#astTree').innerHTML='<div class="tree-empty">A representação gráfica será exibida após uma análise válida.</div>';$('#intermediate').innerHTML='<div class="placeholder">O código intermediário será gerado após uma análise sintática válida.</div>';$('#lineExplanation').innerHTML='<div class="placeholder">Use o botão “Explicar linha” na tabela de tokens para solicitar uma explicação didática.</div>';
+ $('#ast').hidden=true;$('#astTree').hidden=false;$('#toggleAst').textContent='Ver JSON';$('#ast').textContent='A AST será exibida quando a análise sintática for concluída com sucesso.';$('#astTree').innerHTML='<div class="tree-empty">A representação gráfica será exibida após uma análise válida.</div>';$('#intermediate').innerHTML='<div class="placeholder">O código intermediário será gerado após uma análise sintática válida.</div>';$('#lineExplanation').innerHTML='<div class="placeholder">Use o botão “Explicar linha” na tabela de tokens para solicitar uma explicação didática.</div>';
  $('#resultBadge').textContent='AGUARDANDO';$('#resultBadge').className='result-badge';
  $('#copyAst').disabled=true;lastAst=null;
 }
