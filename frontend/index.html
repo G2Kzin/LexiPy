@@ -25,6 +25,17 @@ select,textarea{width:100%;border:1px solid #304361;background:#091323;color:var
 select{padding:11px 13px;margin-bottom:17px}select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #8ba8ff20}
 .editor-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}.editor-top .field-label{margin:0}.counter{font:11px ui-monospace,monospace;color:#8193b0}
 textarea{display:block;min-height:320px;resize:vertical;padding:15px;font:13px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:4;white-space:pre;caret-color:var(--cyan)}
+.editor-surface{position:relative;width:100%;min-height:320px;border:1px solid #304361;border-radius:10px;background:#091323;overflow:hidden}
+.editor-surface:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px #8ba8ff20}
+.editor-surface textarea{position:relative;z-index:2;min-height:320px;margin:0;border:0;border-radius:0;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--cyan);resize:vertical;outline:none;box-shadow:none}
+.editor-surface textarea:focus{border:0;box-shadow:none}
+#highlight{position:absolute;z-index:1;inset:0;margin:0;padding:15px;overflow:hidden;pointer-events:none;color:#d8e2f2;font:13px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:4;white-space:pre}
+#highlight code{font:inherit}
+.token-keyword{color:#c792ea}.token-string{color:#c3e88d}.token-number{color:#f78c6c}.token-comment{color:#7f8c98;font-style:italic}.token-builtin{color:#82aaff}.token-function{color:#ffcb6b}.token-operator{color:#89ddff}.token-boolean{color:#ff9cac}
+body.light .editor-surface{background:#fff;border-color:#c6d2e4}
+body.light #highlight{color:#263954}
+body.light .token-keyword{color:#8b45ad}body.light .token-string{color:#277a43}body.light .token-number{color:#b65b22}body.light .token-comment{color:#788391}body.light .token-builtin{color:#2459b5}body.light .token-function{color:#936000}body.light .token-operator{color:#087f9b}body.light .token-boolean{color:#b33456}
+
 .editor-hint{margin:8px 0 0;color:#8193b0;font-size:11px}
 .actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;border:1px solid transparent;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:800;transition:transform .15s,filter .15s}.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}.btn:disabled{opacity:.55;cursor:wait;transform:none}.primary{background:linear-gradient(135deg,#9ab4ff,#7896f5);color:#091326;box-shadow:0 5px 18px #7896f533}.secondary{background:#1b2a43;border-color:#354866;color:#dce7ff}.statusline{display:flex;align-items:center;gap:8px;margin-top:13px;color:var(--muted);font-size:11px}.statusline .dot{width:7px;height:7px}
 .result-badge{padding:5px 9px;border:1px solid #354866;border-radius:999px;background:#172743;color:#c2d2f6;font-size:10px;font-weight:850;letter-spacing:.06em}.result-badge.good{border-color:#286c59;background:#12372f;color:var(--green)}.result-badge.bad{border-color:#78394a;background:#351b28;color:#ffb3c0}
@@ -104,11 +115,14 @@ body.light .intermediate-code{color:#17664c}
   <label class="field-label" for="examples">Comece por um exemplo</label>
   <select id="examples"><option value="">Selecionar exemplo…</option><option value="hello">Olá, mundo</option><option value="variable">Variáveis e números</option><option value="condition">Estrutura condicional</option><option value="loop">Laço de repetição</option><option value="error">Exemplo com erro léxico</option><option value="syntax">Exemplo com erro sintático</option></select>
   <div class="editor-top"><label class="field-label" for="source">Edite seu código</label><span id="counter" class="counter">0 caracteres</span></div>
-  <textarea id="source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Código-fonte Python">nome = "Ana"
+  <div class="editor-surface">
+   <pre id="highlight" aria-hidden="true"><code id="highlightCode"></code></pre>
+   <textarea id="source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Código-fonte Python">nome = "Ana"
 idade = 20
 
 if idade >= 18:
     print(nome, "maior de idade")</textarea>
+  </div>
   <p class="editor-hint">Dica: experimente alterar os valores ou remover um símbolo para observar os diagnósticos.</p>
   <div class="actions"><button id="analyze" class="btn primary">▶ &nbsp; Analisar código</button><button id="clear" class="btn secondary">Limpar editor</button></div>
   <div class="statusline"><span id="statusDot" class="dot"></span><span id="status" role="status" aria-live="polite">Pronto para analisar.</span></div>
@@ -142,6 +156,29 @@ const examples={
 };
 const $=s=>document.querySelector(s);
 const source=$('#source'), select=$('#examples'), counter=$('#counter'), status=$('#status');
+const highlightCode=$('#highlightCode'), highlightLayer=$('#highlight');
+function updateHighlight(){
+ const code=source.value;
+ const pattern=/(#.*$)|("""[\\s\\S]*?"""|'''[\\s\\S]*?'''|"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*')|\\b(True|False|None)\\b|\\b(def|class|if|elif|else|for|while|in|not|and|or|is|return|break|continue|pass|import|from|as|try|except|finally|with|lambda|yield|global|nonlocal|assert|del|raise)\\b|\\b(print|len|range|input|int|float|str|list|dict|tuple|set|type|sum|min|max|abs|enumerate)\\b(?=\\s*\\()|\\b(\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)\\b|\\b([A-Za-z_][A-Za-z0-9_]*)\\b|(\\*\\*|//|==|!=|<=|>=|:=|[+\\-*/%=<>])|(\\s+)|([\\s\\S])/gm;
+ let result='',match;
+ while((match=pattern.exec(code))!==null){
+  const value=match[0];
+  let cls='';
+  if(match[1]) cls='token-comment';
+  else if(match[2]) cls='token-string';
+  else if(match[3]) cls='token-boolean';
+  else if(match[4]) cls='token-keyword';
+  else if(match[5]) cls='token-builtin';
+  else if(match[6]) cls='token-number';
+  else if(match[7]) cls='token-function';
+  else if(match[8]) cls='token-operator';
+  if(cls) result+='<span class="'+cls+'">'+esc(value)+'</span>';
+  else result+=esc(value);
+ }
+ highlightCode.innerHTML=result+'\\n';
+}
+source.addEventListener('scroll',()=>{highlightLayer.scrollTop=source.scrollTop;highlightLayer.scrollLeft=source.scrollLeft});
+
 let lastAst=null;
 function count(){counter.textContent=source.value.length+' caracteres · '+(source.value.split('\n').length)+' linha(s)'}
 function setStatus(message,type){status.textContent=message;const dot=$('#statusDot');dot.className='dot'+(type==='ok'?' online':type==='error'?' offline':'')}
@@ -154,7 +191,7 @@ function resetResults(){
  $('#resultBadge').textContent='AGUARDANDO';$('#resultBadge').className='result-badge';
  $('#copyAst').disabled=true;lastAst=null;
 }
-source.addEventListener('input',count);count();
+source.addEventListener('input',()=>{count();updateHighlight()});count();updateHighlight();
 
 const themeToggle=$('#themeToggle');
 function applyTheme(theme){
@@ -167,12 +204,12 @@ let savedTheme='dark';try{savedTheme=localStorage.getItem('lexipy-theme')||'dark
 applyTheme(savedTheme);
 themeToggle.addEventListener('click',()=>applyTheme(document.body.classList.contains('light')?'dark':'light'));
 source.addEventListener('keydown',event=>{
- if(event.key==='Tab'){event.preventDefault();const start=source.selectionStart,end=source.selectionEnd;source.setRangeText('    ',start,end,'end');count()}
+ if(event.key==='Tab'){event.preventDefault();const start=source.selectionStart,end=source.selectionEnd;source.setRangeText('    ',start,end,'end');count();updateHighlight()}
  if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();$('#analyze').click()}
 });
 
-select.addEventListener('change',()=>{if(select.value){source.value=examples[select.value];count();setStatus('Exemplo carregado. Você pode editá-lo.');source.focus()}});
-$('#clear').addEventListener('click',()=>{source.value='';select.value='';count();resetResults();source.focus();setStatus('Editor limpo.')});
+select.addEventListener('change',()=>{if(select.value){source.value=examples[select.value];count();updateHighlight();setStatus('Exemplo carregado. Você pode editá-lo.');source.focus()}});
+$('#clear').addEventListener('click',()=>{source.value='';select.value='';count();updateHighlight();resetResults();source.focus();setStatus('Editor limpo.')});
 function esc(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function renderTokens(tokens){
  const counts={};tokens.forEach(t=>counts[t.tipo]=(counts[t.tipo]||0)+1);
