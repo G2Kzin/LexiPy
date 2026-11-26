@@ -159,7 +159,7 @@ const source=$('#source'), select=$('#examples'), counter=$('#counter'), status=
 const highlightCode=$('#highlightCode'), highlightLayer=$('#highlight');
 function updateHighlight(){
  const code=source.value;
- const pattern=/(#.*$)|("""[\\s\\S]*?"""|'''[\\s\\S]*?'''|"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*')|\\b(True|False|None)\\b|\\b(def|class|if|elif|else|for|while|in|not|and|or|is|return|break|continue|pass|import|from|as|try|except|finally|with|lambda|yield|global|nonlocal|assert|del|raise)\\b|\\b(print|len|range|input|int|float|str|list|dict|tuple|set|type|sum|min|max|abs|enumerate)\\b(?=\\s*\\()|\\b(\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)\\b|\\b([A-Za-z_][A-Za-z0-9_]*)\\b|(\\*\\*|//|==|!=|<=|>=|:=|[+\\-*/%=<>])|(\\s+)|([\\s\\S])/gm;
+ const pattern=/(#.*$)|("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|\b(True|False|None)\b|\b(def|class|if|elif|else|for|while|in|not|and|or|is|return|break|continue|pass|import|from|as|try|except|finally|with|lambda|yield|global|nonlocal|assert|del|raise)\b|\b(print|len|range|input|int|float|str|list|dict|tuple|set|type|sum|min|max|abs|enumerate)\b(?=\s*\()|\b(\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b|\b([A-Za-z_][A-Za-z0-9_]*)\b|(\*\*|//|==|!=|<=|>=|:=|[+\-*/%=<>])|(\s+)|([\s\S])/gm;
  let result='',match;
  while((match=pattern.exec(code))!==null){
   const value=match[0];
@@ -175,7 +175,7 @@ function updateHighlight(){
   if(cls) result+='<span class="'+cls+'">'+esc(value)+'</span>';
   else result+=esc(value);
  }
- highlightCode.innerHTML=result+'\\n';
+ highlightCode.innerHTML=result+'\n';
 }
 source.addEventListener('scroll',()=>{highlightLayer.scrollTop=source.scrollTop;highlightLayer.scrollLeft=source.scrollLeft});
 
