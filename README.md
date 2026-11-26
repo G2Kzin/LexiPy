@@ -7,7 +7,10 @@ Projeto educacional para demonstrar etapas iniciais de um compilador usando um s
 - Interface web para inserir ou selecionar código de exemplo.
 - API FastAPI com análise léxica pelo scanner da Etapa 3.
 - Análise sintática por parser recursivo descendente.
-- Construção de AST em estrutura JSON com posição de origem.
+- Construção de AST em estrutura JSON e visualização gráfica em árvore.
+- Geração didática de código intermediário de três endereços a partir da AST.
+- Diagnósticos léxicos e sintáticos com linha, coluna e indicação visual do trecho.
+- Botão para explicar cada linha da tabela de tokens com modelo Llama via Ollama.
 - Diagnósticos sintáticos com linha e coluna.
 - Separação entre erros léxicos e sintáticos.
 - Execução local com Docker Compose e testes automatizados com pytest.
@@ -16,13 +19,15 @@ Projeto educacional para demonstrar etapas iniciais de um compilador usando um s
 
 A gramática é parcial e está documentada em `docs/gramatica-sintatica.md`. Inclui atribuições simples e compostas, expressões com precedência de operadores, chamadas de função, listas, indexação, acesso a atributo, comandos `if/else`, `while`, `for/in`, `return`, `pass`, `break` e `continue`. Não é um parser completo de Python. Funções/classes, importações, exceções, compreensão de listas, tuplas e outras construções permanecem fora do escopo.
 
-O scanner da Etapa 3 continua responsável pelos tokens apresentados ao usuário. Como ele não emite tokens estruturais de quebra de linha e indentação, o parser recebe o texto-fonte e usa internamente o `tokenize` da biblioteca padrão para obter esses limites. O parser só é executado quando não há erros léxicos. A AST é serializável em JSON. O sistema não executa o código e não realiza análise semântica ou geração de código.
+O scanner da Etapa 3 continua responsável pelos tokens apresentados ao usuário. Como ele não emite tokens estruturais de quebra de linha e indentação, o parser recebe o texto-fonte e usa internamente o `tokenize` da biblioteca padrão para obter esses limites. O parser só é executado quando não há erros léxicos. A AST é serializável em JSON e também exibida como árvore gráfica. Após uma análise sintática válida, o sistema gera uma representação didática de código intermediário de três endereços. Essa representação não é código de máquina e não é executada. O sistema não realiza análise semântica.
 
 ## Estrutura
 
 - `backend/scanner.py`: análise léxica da Etapa 3.
 - `backend/parser.py`: parser e construção da AST.
-- `backend/main.py`: endpoints e integração das duas fases.
+- `backend/main.py`: endpoints e integração das fases, incluindo explicação de linhas por IA.
+- `backend/intermediate.py`: gerador didático de código intermediário.
+- `frontend/index.html`: interface responsiva, AST gráfica/JSON, diagnósticos e explicações por linha.
 - `backend/tests/test_parser.py`: testes unitários do parser.
 - `backend/tests/test_api.py`: testes de integração da API.
 - `frontend/index.html`: interface para tokens, erros sintáticos e AST.
@@ -43,6 +48,18 @@ docker compose ps
 
 Interface: http://localhost:8080  
 Documentação da API: http://localhost:8000/docs
+
+### Assistente Llama (opcional)
+
+A explicação de linhas utiliza Ollama executado no computador host. Instale o Ollama, inicie o serviço e baixe um modelo compatível:
+
+```bash
+ollama pull llama3.2
+```
+
+O Docker Compose configura o backend para acessar `host.docker.internal:11434` e usa `llama3.2` por padrão. Para trocar o modelo, ajuste `OLLAMA_MODEL` no `docker-compose.yml`. Se o Ollama ou o modelo não estiver disponível, a análise léxica/sintática continua funcionando; apenas a explicação por IA ficará indisponível.
+
+Na tabela de tokens, clique em **Explicar linha** para consultar a IA. O endpoint `POST /api/explicar-linha` recebe `codigo` e `linha`.
 
 ## Contrato da API
 

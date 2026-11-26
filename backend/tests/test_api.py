@@ -11,6 +11,8 @@ def test_valid_code_returns_tokens_and_ast():
     assert data["sucesso"] is True
     assert data["sintaxe_sucesso"] is True
     assert data["ast"]["tipo"] == "Programa"
+    assert data["codigo_intermediario"] is not None
+    assert "t1 = call print(x)" in data["codigo_intermediario"]
     assert data["status"] == "success"
 
 
