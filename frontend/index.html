@@ -235,7 +235,7 @@ function renderWalkthrough(){
  }else if(activeStage===2){
   const data=lastAnalysis.data;
   if(data.sintaxe_sucesso===true){
-   panel.innerHTML='<h4>3. Análise sintática</h4><p>O parser verifica se a sequência de tokens respeita a gramática implementada e constrói a árvore sintática abstrata (AST).</p><p class="step-success">✓ Estrutura sintática válida. AST construída:</p><div class="step-output"><pre>'+esc(JSON.stringify(data.ast,null,2))+'</pre></div>';
+   panel.innerHTML='<h4>3. Análise sintática</h4><p>O parser verifica se a sequência de tokens respeita a gramática implementada e constrói a árvore sintática abstrata (AST).</p><p class="step-success">✓ Estrutura sintática válida. AST construída:</p><div class="step-output"><div class="ast-tree">'+renderAstNode(data.ast,'Programa')+'</div></div>';
   }else{
    const errors=data.erros_sintaticos||[];
    panel.innerHTML='<h4>3. Análise sintática</h4><p>O parser recebeu os tokens, mas encontrou uma estrutura que não corresponde à gramática implementada.</p><div class="step-errors">'+(errors.length?errors.map(e=>'Linha '+e.linha+', coluna '+e.coluna+': '+esc(e.mensagem)).join('<br>'):'A análise sintática não foi concluída.')+'</div>';
